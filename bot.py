@@ -1,4 +1,8 @@
 import os
+import re
+import time
+from datetime import timedelta
+from collections import defaultdict
 from pathlib import Path
 
 import aiohttp
@@ -24,12 +28,14 @@ class DiscordBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents)
         self._status_i = 0
         self.ai_http: aiohttp.ClientSession | None = None
+        self.message_times = defaultdict(list)
+        self.link_regex = re.compile(r"(http[s]?://|discord\.gg/)", re.IGNORECASE)
 
     async def setup_hook(self) -> None:
         self.ai_http = aiohttp.ClientSession()
         if not os.getenv("OPENAI_API_KEY", "").strip():
             print(
-                "WARNING: OPENAI_API_KEY mangler i .env — AI support kan ikke svare."
+                "WARNING: OPENAI_API_KEY missing in .env — AI support cannot reply."
             )
         await self.tree.sync()
 
@@ -40,11 +46,45 @@ class DiscordBot(commands.Bot):
         await super().close()
 
     async def on_message(self, message: discord.Message) -> None:
+        if message.author.bot or not message.guild:
+            return
+            
+        cat_id = getattr(message.channel, "category_id", None)
+        if isinstance(message.channel, discord.Thread) and message.channel.parent:
+            cat_id = getattr(message.channel.parent, "category_id", None)
+
+        if cat_id != 1487210162388205638 and self.link_regex.search(message.content):
+            try:
+                await message.delete()
+                await message.channel.send(f"⚠️ {message.author.mention}, you are not allowed to send links here!", delete_after=5)
+            except discord.Forbidden:
+                pass
+            return
+
+        now = time.time()
+        uid = message.author.id
+        times = [t for t in self.message_times[uid] if now - t < 10.0]
+        times.append(now)
+        self.message_times[uid] = times
+
+        msg_count = len(times)
+        if msg_count == 5:
+            await message.channel.send(f"{message.author.mention}, warning: Type slower, or you will get timed out!", delete_after=5)
+        elif msg_count >= 6:
+            try:
+                await message.author.timeout(timedelta(minutes=5), reason="Spam")
+                await message.channel.send(f"{message.author.mention} has been timed out for 5 minutes due to spam.")
+                self.message_times[uid] = []
+                # Fall through to return if timeout successful
+                return
+            except discord.Forbidden:
+                # If bot lacks permission to timeout this user (e.g. they are an admin), it will ignore the timeout but still send the warning if you prefer, 
+                # or just pass and do nothing. Here we just print the warning to show it triggered.
+                await message.channel.send(f"⚠️ {message.author.mention} spam detected, but I do not have permissions to timeout an admin!")
+                self.message_times[uid] = []
+                return
+
         await self.process_commands(message)
-        if message.author.bot:
-            return
-        if not message.guild:
-            return
         ch = message.channel
         if not isinstance(ch, (discord.abc.GuildChannel, discord.Thread)):
             return
@@ -55,7 +95,7 @@ class DiscordBot(commands.Bot):
         await handle_ai_support_message(self, message, http=self.ai_http)
 
     async def on_ready(self) -> None:
-        print(f"Logget ind som {self.user} (id: {self.user.id})")
+        print(f"Logged in as {self.user} (id: {self.user.id})")
         self._status_i = 0
         await self.change_presence(
             status=discord.Status.dnd,
@@ -88,21 +128,21 @@ def _debug_category_id(ch: discord.abc.GuildChannel) -> int | None:
     return ch.category_id
 
 
-@bot.tree.command(name="ping", description="Tjek at botten svarer")
+@bot.tree.command(name="ping", description="Check that the bot responds")
 async def ping(interaction: discord.Interaction) -> None:
     await interaction.response.send_message("Pong!")
 
 
 @bot.tree.command(
     name="ai_debug",
-    description="Vis kanal- og kategori-ID (brug til at matche ids.py)",
+    description="Show channel and category ID (use to match ids.py)",
 )
 async def ai_debug(interaction: discord.Interaction) -> None:
     if not interaction.guild or not isinstance(
         interaction.channel, (discord.abc.GuildChannel, discord.Thread)
     ):
         await interaction.response.send_message(
-            "Kun i en server-kanal.", ephemeral=True
+            "Server channels only.", ephemeral=True
         )
         return
     ch = interaction.channel
@@ -110,21 +150,21 @@ async def ai_debug(interaction: discord.Interaction) -> None:
     match = channel_is_ai_support(ch)
     await interaction.response.send_message(
         f"**channel_id:** `{ch.id}`\n"
-        f"**category_id (løst):** `{cat_id}`\n"
+        f"**category_id (resolved):** `{cat_id}`\n"
         f"**ids.py — AI_SUPPORT_CATEGORY_ID:** `{ids.AI_SUPPORT_CATEGORY_ID}`\n"
-        f"**Kanal-ID whitelist (ids.py + AI_CHANNEL_IDS_EXTRA):** `{ai_channel_ids_for_debug()}`\n"
-        f"**Botten behandler denne kanal som AI-support:** {'ja' if match else 'nej'}\n"
-        f"Hvis **nej**: sæt rigtigt kanal-ID i `ids.py` eller tilføj det i `.env` som "
-        f"`AI_CHANNEL_IDS_EXTRA=1234567890123456789` (kommasepareret). "
-        f"Giv botten **Read Message History** + **Send Messages** i kanalen.",
+        f"**Channel-ID whitelist (ids.py + AI_CHANNEL_IDS_EXTRA):** `{ai_channel_ids_for_debug()}`\n"
+        f"**The bot treats this channel as AI-support:** {'yes' if match else 'no'}\n"
+        f"If **no**: set the correct channel-ID in `ids.py` or add it to `.env` as "
+        f"`AI_CHANNEL_IDS_EXTRA=1234567890123456789` (comma separated). "
+        f"Give the bot **Read Message History** + **Send Messages** in the channel.",
         ephemeral=True,
     )
 
 
 from discord import app_commands
 
-@bot.tree.command(name="clearchat", description="Slet beskeder i kanalen (Kun for Management)")
-@app_commands.describe(amount="Antal beskeder der skal slettes (standard: 100)")
+@bot.tree.command(name="clearchat", description="Clear messages in the channel (Management only)")
+@app_commands.describe(amount="Amount of messages to delete (default: 100)")
 async def clearchat(interaction: discord.Interaction, amount: int = 100) -> None:
     has_permission = False
     if interaction.user.id == ids.MANAGEMENT_ID:
@@ -134,29 +174,29 @@ async def clearchat(interaction: discord.Interaction, amount: int = 100) -> None
             has_permission = True
             
     if not has_permission:
-        await interaction.response.send_message("Du har ikke tilladelse til at bruge denne kommando.", ephemeral=True)
+        await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
         return
         
     await interaction.response.defer(ephemeral=True)
     
     if not hasattr(interaction.channel, "purge"):
-        await interaction.followup.send("Kan ikke slette beskeder i denne type kanal.", ephemeral=True)
+        await interaction.followup.send("Cannot delete messages in this type of channel.", ephemeral=True)
         return
         
     try:
         deleted = await interaction.channel.purge(limit=amount)
-        await interaction.followup.send(f"✅ Slettede {len(deleted)} beskeder.", ephemeral=True)
+        await interaction.followup.send(f"✅ Deleted {len(deleted)} messages.", ephemeral=True)
     except discord.Forbidden:
-        await interaction.followup.send("❌ Jeg har ikke tilladelse til at slette beskeder her. Tjek mine 'Manage Messages' rettigheder.", ephemeral=True)
+        await interaction.followup.send("❌ I do not have permission to delete messages here. Check my 'Manage Messages' permissions.", ephemeral=True)
     except discord.HTTPException as e:
-        await interaction.followup.send(f"❌ Fejl under sletning: {e}", ephemeral=True)
+        await interaction.followup.send(f"❌ Error during deletion: {e}", ephemeral=True)
 
 
 def main() -> None:
     token = os.getenv("DISCORD_TOKEN")
     if not token:
         raise SystemExit(
-            "Mangler DISCORD_TOKEN. Kopiér .env.example til .env og sæt token."
+            "Missing DISCORD_TOKEN. Copy .env.example to .env and set the token."
         )
     bot.run(token)
 
