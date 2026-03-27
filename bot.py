@@ -192,6 +192,52 @@ async def clearchat(interaction: discord.Interaction, amount: int = 100) -> None
         await interaction.followup.send(f"❌ Error during deletion: {e}", ephemeral=True)
 
 
+@bot.tree.command(name="register-cheater", description="Register a suspected cheater to the database")
+@app_commands.describe(
+    target_id="Target's Discord ID or SteamID64",
+    cheat="What cheat were they using? (e.g. Aimbot, ESP)",
+    evidence="Upload an image or video outlining the cheat"
+)
+async def register_cheater(
+    interaction: discord.Interaction, 
+    target_id: str, 
+    cheat: str, 
+    evidence: discord.Attachment
+) -> None:
+    await interaction.response.defer(ephemeral=True)
+    
+    try:
+        file_bytes = await evidence.read()
+        
+        data = aiohttp.FormData()
+        data.add_field("target_id", target_id)
+        data.add_field("reporter_id", str(interaction.user.id))
+        data.add_field("cheat", cheat)
+        
+        # We need to pass evidence as a file-like object or bytes with filename
+        data.add_field("evidence", file_bytes, filename=evidence.filename, content_type=evidence.content_type)
+        
+        headers = {
+            "x-api-key": "lucas_secret_api_key_1337"
+        }
+        
+        url = "http://localhost:3000/api/reports"
+        
+        session = bot.ai_http
+        if not session:
+            session = aiohttp.ClientSession()
+            bot.ai_http = session
+
+        async with session.post(url, data=data, headers=headers) as resp:
+            if resp.status in (200, 201):
+                await interaction.followup.send(f"✅ Successfully registered cheater `{target_id}`.")
+            else:
+                resp_text = await resp.text()
+                await interaction.followup.send(f"❌ Failed to register cheater (HTTP {resp.status}):\n```\n{resp_text[:1000]}\n```")
+    except Exception as e:
+        await interaction.followup.send(f"❌ Could not reach the API: {e}")
+
+
 def main() -> None:
     token = os.getenv("DISCORD_TOKEN")
     if not token:
