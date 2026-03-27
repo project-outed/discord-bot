@@ -33,6 +33,8 @@ def resolve_category_id(channel: discord.abc.GuildChannel | discord.Thread) -> i
 
 
 def channel_is_ai_support(channel: discord.abc.GuildChannel | discord.Thread) -> bool:
+    if getattr(channel, "id", None) == 1487186775729504280:
+        return False
     cat = resolve_category_id(channel)
     if cat == ids.AI_SUPPORT_CATEGORY_ID:
         return True
