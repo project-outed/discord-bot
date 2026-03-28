@@ -1,6 +1,5 @@
+.venv
 .env
-.venv/
-venv/
-__pycache__/
-*.pyc
-.python-version
+last.py
+__pycache__
+data/tickets/transcripts
