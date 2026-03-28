@@ -1,0 +1,37 @@
+{
+    "categories": [
+        {
+            "title": "Threat Reporting",
+            "description": "Submit actionable, verifiable evidence regarding malicious actors for database inclusion.",
+            "value": "threat_report",
+            "emotes": [
+                "",
+                "",
+                "",
+                ""
+            ]
+        },
+        {
+            "title": "Platform Assistance",
+            "description": "General inquiries, account management, and technical assistance utilizing Outed services.",
+            "value": "support",
+            "emotes": [
+                "",
+                "",
+                "",
+                ""
+            ]
+        },
+        {
+            "title": "Legal & Compliance",
+            "description": "Data handling protocols, privacy inquiries, and legal compliance (No record appeals).",
+            "value": "compliance",
+            "emotes": [
+                "",
+                "",
+                "",
+                ""
+            ]
+        }
+    ]
+}
