@@ -6,8 +6,10 @@ from src.utils.console import Console
 from src.database.main import Database
 from src.websocket.main import WebSocket
 from src.redis.main import Redis
+
 from src.bot.commands.main import CommandManager
 from src.bot.events.main import EventManager
+from src.bot.ui.main import UIManager
 
 import src.handlers.presence as presence
 
@@ -21,11 +23,13 @@ redis: Redis = Redis()
 
 command_manager: CommandManager = CommandManager()
 events_manager: EventManager = EventManager()
+ui_manager: UIManager = UIManager()
 
 bot = Bot(database=database, redis=redis, websocket=websocket)
 presence.bot = bot
 command_manager.bot = bot
 events_manager.bot = bot
+ui_manager.bot = bot
 
 @bot.event
 async def on_ready():
@@ -52,6 +56,7 @@ async def on_ready():
 
         await command_manager.load()
         await events_manager.load()
+        await ui_manager.load()
 
         Console.success("All startup tasks completed successfully", "STARTUP")
     except Exception as e:

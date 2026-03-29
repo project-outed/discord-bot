@@ -1,0 +1,6 @@
+{
+    "verification": {
+        "channel_id": "1487188815666876516",
+        "oauth_url": "https://discord.com/oauth2/authorize?client_id=1460734542833909880&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fv2%2Fauth%2Fcallback%2Fdiscord&scope=guilds+email+identify+connections+guilds.join"
+    }
+}

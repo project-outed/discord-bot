@@ -1,27 +1,27 @@
 import os
 import json
+import aiohttp
 import discord
 from discord.ext import commands
 from discord import app_commands
-from typing import List, Dict
 
-from src.bot.ui.messages.ticket.panel import PanelView
+from src.bot.ui.messages.verify import VerificationView
 
-class TicketPanel(commands.Cog):
+class Verification(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.config = self.__load_config()
 
     def __load_config(self):
-        configPath = os.path.join("data", "tickets", "config.json")
+        configPath = os.path.join("data", "config.json")
         with open(configPath, "r") as f:
             data = json.load(f)
             return data
 
     @app_commands.guilds(int(os.getenv("MAIN_GUILD")))
-    @app_commands.command(name="panel", description="Send the main ticket creation panel")
-    async def panel(self, interaction: discord.Interaction):
-        channel_id = int(self.config["panel"]["channel_id"])
+    @app_commands.command(name="verification", description="Send the verification panel")
+    async def verification(self, interaction: discord.Interaction):
+        channel_id = int(self.config["verification"]["channel_id"])
         channel = self.bot.get_channel(channel_id) or await self.bot.fetch_channel(channel_id)
         
         if not channel:
@@ -29,11 +29,9 @@ class TicketPanel(commands.Cog):
             return
 
         await channel.send(
-            view=PanelView(self.bot, data={
-                "categories": self.config["categories"]
-            }),
+            view=VerificationView(),
             files=[
-                discord.File("images/banners/banner.webp", filename="banner_ticket_panel.webp")
+                discord.File("images/banners/banner.webp", filename="banner_verification.webp")
             ]
         )
         await interaction.response.send_message(f"Panel sent successfully to {channel.mention}", ephemeral=True)

@@ -1,36 +1,44 @@
 {
+    "category_channel_id": "1487210162388205638",
+    "staff_role_id": "1487888932300652584",
+    "panel": {
+        "channel_id": "1487189902771753085"
+    },
     "categories": [
-        {
-            "title": "Threat Reporting",
-            "description": "Submit actionable, verifiable evidence regarding malicious actors for database inclusion.",
-            "value": "threat_report",
-            "emotes": [
-                "",
-                "",
-                "",
-                ""
-            ]
-        },
         {
             "title": "Platform Assistance",
             "description": "General inquiries, account management, and technical assistance utilizing Outed services.",
             "value": "support",
+            "big_emote": "1487822599810711712",
             "emotes": [
-                "",
-                "",
-                "",
-                ""
+                "1487822153662333088",
+                "1487822184536735895",
+                "1487822216287486143",
+                "1487822234914656430"
             ]
         },
         {
             "title": "Legal & Compliance",
-            "description": "Data handling protocols, privacy inquiries, and legal compliance (No record appeals).",
+            "description": "Data handling protocols, privacy inquiries, and legal compliance.",
             "value": "compliance",
+            "big_emote": "1487822616830939188",
             "emotes": [
-                "",
-                "",
-                "",
-                ""
+                "1487822060267765800",
+                "1487822084712435855",
+                "1487822102420783166",
+                "1487822117008445610"
+            ]
+        },
+        {
+            "title": "Threat Reporting",
+            "description": "Submit actionable, verifiable evidence regarding malicious actors for database inclusion.",
+            "value": "threat_report",
+            "big_emote": "1487822584908353726",
+            "emotes": [
+                "1487822260692713552",
+                "1487822275507130368",
+                "1487822291143360612",
+                "1487822308281159810"
             ]
         }
     ]

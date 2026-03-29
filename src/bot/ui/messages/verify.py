@@ -5,7 +5,7 @@ from discord import ui
 class VerificationView(discord.ui.LayoutView):
     def __init__(self):
         super().__init__()
-
+        
         container = ui.Container()
 
         container.add_item(ui.MediaGallery(discord.MediaGalleryItem(
@@ -21,7 +21,6 @@ class VerificationView(discord.ui.LayoutView):
             "Click the button below to start the verification.\n"
             "Your personal data is securely stored and protected."
         ))
-
 
         container.add_item(ui.Separator(spacing=discord.SeparatorSpacing.small, visible=False))
 

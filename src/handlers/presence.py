@@ -18,9 +18,10 @@ async def Presence():
         return
 
     raw_message = next(_cycle)
+    guilds_count = len(bot.guilds) - 1
     
     message = raw_message.format(
-        guild_count=len(bot.guilds)
+        guild_count=guilds_count
     )
 
     try:
