@@ -35,16 +35,16 @@ class Database:
 
             return self.pool
         except Exception as e:
-            Console.error(f"Failed to connect to PostgreSQL: {e}", module="Database")
+            Console.error(f"Failed to connect to PostgreSQL: {e}", module="DATABASE")
     
 
     async def close(self):
         try:
             if self.pool:
                 await self.pool.close()
-                Console.info("Closed PostgreSQL connection successfully", module="Database")
+                Console.info("Closed PostgreSQL connection successfully", module="DATABASE")
         except Exception as e:
-            Console.error(f"Failed to close PostgreSQL connection: {e}", module="Database")
+            Console.error(f"Failed to close PostgreSQL connection: {e}", module="DATABASE")
     
     async def getPool(self):
         if self.pool is None:

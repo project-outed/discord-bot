@@ -21,13 +21,19 @@ class Bot(commands.Bot):
         super().__init__(command_prefix=".", intents=intents)
 
     async def close(self):
+        Console.info("Initiating cleanup sequence...", "SHUTDOWN")
+        
+        tasks = []
         if self.db:
-            await self.db.close()
-            
+            tasks.append(self.db.close())
         if self.redis:
-            await self.redis.close()
-            
+            tasks.append(self.redis.close())
         if self.websocket:
-            await self.websocket.stop()
+            tasks.append(self.websocket.stop())
+            
+        if tasks:
+            import asyncio
+            await asyncio.gather(*tasks, return_exceptions=True)
             
         await super().close()
+        Console.success("All connections closed. Bot shut down.", "SHUTDOWN")

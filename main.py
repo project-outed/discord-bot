@@ -1,3 +1,5 @@
+from sys import excepthook
+import asyncio
 import asyncio
 
 from src.bot.main import Bot
@@ -31,15 +33,19 @@ command_manager.bot = bot
 events_manager.bot = bot
 ui_manager.bot = bot
 
+bot.initialized = False
+
 @bot.event
 async def on_ready():
+    if bot.initialized:
+        return
+    
     try:
         await bot.wait_until_ready()
 
         if database:
-            pool = await database.connect()
-            if pool:
-                Console.success(f'Connected to database: "{os.getenv("DATABASE_NAME")}" (IP: {os.getenv("DATABASE_HOST")})', "DATABASE")
+            await database.connect()
+            Console.success(f'Connected to database: "{os.getenv("DATABASE_NAME")}" (IP: {os.getenv("DATABASE_HOST")})', "DATABASE")
         
         if redis:
             await redis.connect()
@@ -58,12 +64,24 @@ async def on_ready():
         await events_manager.load()
         await ui_manager.load()
 
+        bot.initialized = True
         Console.success("All startup tasks completed successfully", "STARTUP")
     except Exception as e:
         Console.error(f"An unexpected error occurred during startup: {e}", "STARTUP")
 
+
+async def run():
+    try:
+        await bot.start(os.getenv("BOT_TOKEN"))
+    finally:
+        if not bot.is_closed():
+            await bot.close()
+
 if __name__ == "__main__":
     try:
-        bot.run(os.getenv("BOT_TOKEN"), log_handler=None)
+        asyncio.run(run())
     except KeyboardInterrupt:
         pass
+    finally:
+        if not bot.is_closed():
+            asyncio.run(bot.close())

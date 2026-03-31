@@ -30,7 +30,7 @@ class Redis:
         try:
             if self.client:
                 await self.client.close()
-                Console.info("Redis connection closed successfully", "REDIS")
+                Console.info("Closed Redis connection successfully", "REDIS")
                 self.client = None
         except Exception as e:
             Console.error(f"Error while closing Redis connection: {e}", "REDIS")
