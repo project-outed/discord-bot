@@ -9,7 +9,7 @@
             "title": "Platform Assistance",
             "description": "General inquiries, account management, and technical assistance utilizing Outed services.",
             "value": "support",
-            "big_emote": "1487822599810711712",
+            "button_emote": "1487822599810711712",
             "emotes": [
                 "1487822153662333088",
                 "1487822184536735895",
@@ -21,7 +21,7 @@
             "title": "Legal & Compliance",
             "description": "Data handling protocols, privacy inquiries, and legal compliance.",
             "value": "compliance",
-            "big_emote": "1487822616830939188",
+            "button_emote": "1487822616830939188",
             "emotes": [
                 "1487822060267765800",
                 "1487822084712435855",
@@ -33,7 +33,7 @@
             "title": "Threat Reporting",
             "description": "Submit actionable, verifiable evidence regarding malicious actors for database inclusion.",
             "value": "threat_report",
-            "big_emote": "1487822584908353726",
+            "button_emote": "1487822584908353726",
             "emotes": [
                 "1487822260692713552",
                 "1487822275507130368",

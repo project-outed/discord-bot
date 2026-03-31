@@ -22,7 +22,7 @@ class PanelButtons(ui.View):
             button = ui.Button(
                 label=category['title'],
                 style=discord.ButtonStyle.gray,
-                emoji=discord.PartialEmoji(name=f"ticket_{category['value']}", id=category['big_emote']),
+                emoji=discord.PartialEmoji(name=f"ticket_{category['value']}", id=category['button_emote']),
                 custom_id=f"ticket_panel_{category['value']}"
             )
             button.callback = self.callback
