@@ -29,7 +29,7 @@ class Verification(commands.Cog):
             return
 
         await channel.send(
-            view=VerificationView(),
+            view=VerificationView(data=self.config),
             files=[
                 discord.File("images/banners/banner.webp", filename="banner_verification.webp")
             ]
