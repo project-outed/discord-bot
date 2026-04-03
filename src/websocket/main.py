@@ -3,6 +3,7 @@ import asyncio
 import json
 import os
 from src.utils.console import Console
+from src.handlers.monitor import Monitor
 
 class WebSocket:
     def __init__(self):
@@ -11,6 +12,7 @@ class WebSocket:
         self._session = None
         self._reconnect_interval = 5
         self._running = False
+        self.monitor = None
 
     async def start(self):
         self._running = True
@@ -46,12 +48,15 @@ class WebSocket:
     async def _handle_raw_message(self, data: str):
         try:
             payload = json.loads(data)
+
+            await self.monitor.websocketMessage(payload)
             await self.on_message(payload)
         except json.JSONDecodeError:
             Console.warning(f"Received non-JSON payload: {data[:100]}...", module="WEBSOCKET")
 
     async def on_message(self, last_payload: dict):
-        Console.debug(f"Received message: {last_payload}", module="WEBSOCKET")
+        #Console.debug(f"Received message: {last_payload}", module="WEBSOCKET")
+        pass
 
     async def send(self, data: dict):
         if self.ws and not self.ws.closed:

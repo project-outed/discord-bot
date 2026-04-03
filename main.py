@@ -12,6 +12,7 @@ from src.redis.main import Redis
 from src.bot.commands.main import CommandManager
 from src.bot.events.main import EventManager
 from src.bot.ui.main import UIManager
+from src.handlers.monitor import Monitor
 
 import src.handlers.presence as presence
 
@@ -26,12 +27,16 @@ redis: Redis = Redis()
 command_manager: CommandManager = CommandManager()
 events_manager: EventManager = EventManager()
 ui_manager: UIManager = UIManager()
+monitor: Monitor = Monitor()
+
+websocket.monitor = monitor
 
 bot = Bot(database=database, redis=redis, websocket=websocket)
 presence.bot = bot
 command_manager.bot = bot
 events_manager.bot = bot
 ui_manager.bot = bot
+monitor.bot = bot
 
 bot.initialized = False
 
