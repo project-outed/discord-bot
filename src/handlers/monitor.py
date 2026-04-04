@@ -4,7 +4,7 @@ import json
 import discord
 
 from src.utils.console import Console
-from src.bot.ui.messages.expose import ExposeView
+from src.bot.ui.messages.expose.expose import ExposeView
 
 bot: discord.Client = None
 
@@ -29,14 +29,18 @@ class Monitor:
 		if not channel:
 			Console.error(f"Channel with ID {channel_id} not found.", module="MONITOR")
 			return
+		
+
+		user = await self.bot.fetch_user(int(data.get("target_user_id", 0)))
 
 		await channel.send(
             view=ExposeView(data={
-				"target_username": data.get("target_username", "Unknown"),
-				"target_user_id": data.get("target_user_id", "Unknown"),
+				"target_username": user.display_name if user else "Unknown",
+				"target_user_id": user.id if user else "Unknown",
 				"cheat": data.get("reason", "No reason provided"),
 				"game": data.get("game", "Unknown"),
 				"trust_score": data.get("trust_score", "N/A"),
+				"avatar_url": user.display_avatar.url if user else ""
 			}),
         )
 		
@@ -49,7 +53,6 @@ class Monitor:
 			)
 
 			await self.sendReport(data={
-				"target_username": data.get("target_username", "Unknown"),
 				"target_user_id": data.get("target_user_id", "Unknown"),
 				"reason": data.get("reason", "No reason provided"),
 				"game": data.get("game", "Unknown"),

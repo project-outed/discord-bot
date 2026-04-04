@@ -1,4 +1,3 @@
-from sys import excepthook
 import asyncio
 import asyncio
 

@@ -5,19 +5,20 @@ class ExposeView(discord.ui.LayoutView):
     def __init__(self, data: dict = None):
         super().__init__()
         self.data = data
-
         container = ui.Container()
 
         container.add_item(
-            ui.TextDisplay(
-                "### **RULE VIOLATION NOTICE**\n\n"
-                "**TARGET IDENTIFICATION**\n"
-                f"Name: `{self.data['target_username']}`\n"
-                f"Platform ID: `{self.data['target_user_id']}`\n\n"
-                "**VIOLATION DATA**\n"
-                f"Software Detected: `{self.data['cheat']}`\n"
-                f"Game Environment: `{self.data['game']}`\n"
-                f"Calculated Trust Score: `{self.data['trust_score']}/100`\n\n"
+            ui.Section(
+                ui.TextDisplay(
+                    "**TARGET IDENTIFICATION**\n"
+                    f"Name: `{self.data['target_username']}`\n"
+                    f"Platform ID: `{self.data['target_user_id']}`\n\n"
+                    "**VIOLATION DATA**\n"
+                    f"Software Detected: `{self.data['cheat']}`\n"
+                    f"Game Environment: `{self.data['game']}`\n"
+                    f"Calculated Trust Score: `{self.data['trust_score']}/100`"
+                ),
+                accessory=ui.Thumbnail(self.data['avatar_url'])
             )
         )
 
