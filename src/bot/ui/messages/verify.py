@@ -8,10 +8,7 @@ class VerificationView(discord.ui.LayoutView):
     def __init__(self, data = None):
         super().__init__()
         self.data = data
-    
-        print("VerificationView initialized with data:", self.data)
-        print(self.data["verification"]["oauth_url"] if self.data and "verification" in self.data else "No OAuth URL found in data")
-        
+            
         container = ui.Container()
 
         container.add_item(

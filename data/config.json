@@ -8,5 +8,11 @@
         "websocket": {
             "event": "exposed_cheater"
         }
+    },
+    "permissions": {
+        "verification": [
+            1490053842237390858,
+            1487187112670396466
+        ]
     }
 }

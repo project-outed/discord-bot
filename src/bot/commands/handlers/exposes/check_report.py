@@ -6,6 +6,8 @@ import aiohttp
 from discord.ext import commands
 from discord import app_commands
 
+from src.utils.permission import Permission
+
 from src.bot.ui.messages.expose.check_report import CheckReportView 
 
 class CheckReport(commands.Cog):
@@ -27,6 +29,12 @@ class CheckReport(commands.Cog):
     @app_commands.autocomplete(report=reports_autocomplete)
     async def check_report(self, interaction: discord.Interaction, report: str):        
         await interaction.response.defer(ephemeral=True)
+
+        permission_ids = Permission().get_permission(config=os.path.join("data", "expose", "config.json"))
+        access = Permission(user=interaction.user, ids=permission_ids['permission']).role()
+
+        if not access:
+            return await interaction.followup.send("You don't have permission to use this command.", ephemeral=True)
         
         report_id = int(report)
         rows = await self.bot.db.fetch("SELECT * FROM reports WHERE id = $1", report_id)

@@ -43,7 +43,7 @@ class PanelButtons(ui.View):
             overwrites={
                 interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False, send_messages=False),
                 interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-                interaction.guild.get_role(int(self.data['staff_role_id'])): discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                interaction.guild.get_role(int(self.data['permission'])): discord.PermissionOverwrite(read_messages=True, send_messages=True),
             },
         )
 
