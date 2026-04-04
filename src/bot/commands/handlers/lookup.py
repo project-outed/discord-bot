@@ -13,6 +13,7 @@ class Lookup(commands.Cog):
 
     @app_commands.command(name="lookup", description="Lookup a user")
     async def lookup(self, interaction: discord.Interaction, target: discord.User):
+
         await interaction.response.defer(ephemeral=True)
         async with aiohttp.ClientSession() as session:
             async with session.get(f"{self.baseURI}/api/users/{target.id}", headers={ 

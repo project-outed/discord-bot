@@ -1,0 +1,14 @@
+{
+    "buttons": [
+        {
+            "title": "Accepted Reports",
+            "value": "accept",
+            "button_emote": "1487822599810711712"
+        },
+        {
+            "title": "Rejected Reports",
+            "value": "decline",
+            "button_emote": "1487822599810711712"
+        }
+    ]
+}
