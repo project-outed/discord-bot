@@ -1,13 +1,10 @@
-from src.bot.ui.buttons.ticket.delete import DeleteTicketButton
 import discord
 from discord import ui
-import asyncio
 
-class CloseTicketView(discord.ui.LayoutView):
-    def __init__(self, data: dict, bot: discord.Client):
-        super().__init__(timeout=None)
+class ChannelView(discord.ui.LayoutView):
+    def __init__(self, data: dict):
+        super().__init__()
         self.data = data
-        self.bot = bot
 
         container = ui.Container()
 
@@ -24,12 +21,11 @@ class CloseTicketView(discord.ui.LayoutView):
                     f"Trust Score: `{self.data.get('trust_score', 'N/A')}/100`\n\n"
 
                     "**TICKET INFORMATION**\n"
+                    f"Reason: `{self.data.get('reason', 'N/A')}`\n"
                     f"Category: `{self.data.get('category', 'N/A')}`\n"
-                    f"Closed By: `{self.data.get('closed_by', 'N/A')}`\n"
-                    f"Closed Reason: `{self.data.get('reason', 'N/A')}`\n"
-                    f"Closed At: `{self.data.get('closed_at', 'N/A')}`\n\n"
+                    f"Created At: `{self.data.get('created_at', 'N/A')}`\n\n"
 
-                    "-# This ticket has been closed. You may press the button to delete the channel."
+                    "-# Thank you for reaching out. Please remain on standby while our team reviews your request."
                 ),
                 accessory=ui.Thumbnail(self.data.get('avatar')) if self.data.get('avatar') else None
             )
@@ -37,12 +33,6 @@ class CloseTicketView(discord.ui.LayoutView):
 
         container.add_item(
             ui.Separator(spacing=discord.SeparatorSpacing.small, visible=True)
-        )
-
-        container.add_item(
-            ui.ActionRow(
-                DeleteTicketButton(self.bot).children[0]
-            )
         )
 
         container.add_item(ui.TextDisplay(

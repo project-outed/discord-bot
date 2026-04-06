@@ -3,6 +3,9 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
+from src.utils.console import Console
+from src.utils.permission import Permission
+
 class Unclaim(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -10,4 +13,17 @@ class Unclaim(commands.Cog):
     @app_commands.guilds(int(os.getenv("MAIN_GUILD")))
     @app_commands.command(name="unclaim", description="Unclaim the ticket")
     async def unclaim(self, interaction: discord.Interaction):
-        pass
+        permission_ids = Permission().get_permission(config=os.path.join("data", "tickets", "config.json"))
+        access = Permission(user=interaction.user, ids=permission_ids['permission'][0]).role()
+
+        if not access:
+            return await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
+
+        ticket = await self.bot.db.tickets.get_ticket(interaction.channel.id)
+        if not ticket:
+            return await interaction.response.send_message("This channel is not a ticket.", ephemeral=True)
+        if not ticket.get('claimed_by'):
+            return await interaction.response.send_message("This ticket is not claimed by anyone.", ephemeral=True)
+            
+        await self.bot.db.tickets.unclaim_ticket(interaction.channel.id)
+        await interaction.response.send_message("Ticket has been unclaimed.", ephemeral=False)

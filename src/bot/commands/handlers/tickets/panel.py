@@ -23,11 +23,8 @@ class TicketPanel(commands.Cog):
     async def panel(self, interaction: discord.Interaction):
         permission_ids = Permission().get_permission(config=os.path.join("data", "tickets", "config.json"))
         access = Permission(user=interaction.user, ids=permission_ids['panel']['permissions']).role()
-
         if not access:
             return await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
-
-
 
         channel_id = int(self.config["panel"]["channel_id"])
         channel = self.bot.get_channel(channel_id) or await self.bot.fetch_channel(channel_id)
