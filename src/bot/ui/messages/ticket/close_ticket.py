@@ -41,7 +41,7 @@ class CloseTicketView(discord.ui.LayoutView):
 
         container.add_item(
             ui.ActionRow(
-                DeleteTicketButton(self.bot).children[0]
+                *DeleteTicketButton(self.bot).children
             )
         )
 

@@ -49,7 +49,7 @@ class LookupView(discord.ui.LayoutView):
                     ui.TextDisplay(
                         "**%s**\n-# %s" % (
                             category['reason'],
-                            f"Game: {category['game']} - Added on: {timestamp_obj.strftime("%Y-%m-%d %H:%M:%S")}"
+                            f"Game: {category['game']} - Added on: {timestamp_obj.strftime('%Y-%m-%d %H:%M:%S')}"
                         )
                     )
                 )
