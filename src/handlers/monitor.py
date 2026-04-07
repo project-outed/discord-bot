@@ -25,13 +25,25 @@ class Monitor:
 			Console.warning("No channel ID configured for expose reports.", module="MONITOR")
 			return
 
-		channel = self.bot.get_channel(int(channel_id)) or await self.bot.fetch_channel(int())
+		channel = self.bot.get_channel(int(channel_id)) or await self.bot.fetch_channel(int(channel_id))
 		if not channel:
 			Console.error(f"Channel with ID {channel_id} not found.", module="MONITOR")
 			return
 		
 
 		user = await self.bot.fetch_user(int(data.get("target_user_id", 0)))
+
+		guild_id = int(os.getenv("MAIN_GUILD"))
+		guild = self.bot.get_guild(guild_id) or await self.bot.fetch_guild(guild_id)
+		
+		if guild:
+			role_id = int(self.config['expose'].get('role_id', 0))
+			role = guild.get_role(role_id)
+			
+			if role:
+				member = guild.get_member(user.id) or await guild.fetch_member(user.id)
+				if member:
+					await member.add_roles(role, reason="User has been exposed")
 
 		await channel.send(
             view=ExposeView(data={
@@ -47,11 +59,7 @@ class Monitor:
 	async def websocketMessage(self, payload: dict):
 		if payload.get("event") == str(self.config['expose']['websocket']['event']):
 			data = payload.get("data", {})
-			Console.info(
-				f"Received report for user {data.get('target_username', 'Unknown')} with reason: {data.get('reason', 'No reason provided')}", 
-				module="MONITOR"
-			)
-
+			
 			await self.sendReport(data={
 				"target_user_id": data.get("target_user_id", "Unknown"),
 				"reason": data.get("reason", "No reason provided"),
