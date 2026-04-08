@@ -61,7 +61,7 @@ class Monitor:
 								member = guild.get_member(user.id) or await guild.fetch_member(user.id)
 								await member.add_roles(role, reason="User has been exposed")
 							except discord.NotFound:
-								return
+								pass
 							except discord.Forbidden:
 								Console.warning(f"Bot lacks permissions to add role to {user.display_name} ({user.id}).", module="MONITOR")
 							except Exception as e:
