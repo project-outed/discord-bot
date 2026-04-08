@@ -2,7 +2,7 @@
     "verification": {
         "role_id": "1487188701791518810",
         "channel_id": "1487188815666876516",
-        "oauth_url": "https://discord.com/oauth2/authorize?client_id=1487162495151112404&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fcallback%2Fdiscord&scope=identify+email"
+        "oauth_url": "https://discord.com/oauth2/authorize?client_id=1487162495151112404&response_type=code&redirect_uri=https%3A%2F%2Fbackend.outed.dev%2Fcallback%2Fdiscord&scope=email+identify"
     },
     "expose": {
         "role_id": "1487187887303823401",
