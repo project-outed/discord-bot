@@ -12,10 +12,10 @@ class Redis:
     async def connect(self):
         try:
             self.client = redis.Redis(
-                host=os.getenv("REDIS_HOST", "localhost"),
-                port=int(os.getenv("REDIS_PORT", 6379)),
+                host=self.host,
+                port=self.port,
                 password=os.getenv("REDIS_PASS", None) or None,
-                db=int(os.getenv("REDIS_DB", 0)),
+                db=self.db,
                 decode_responses=True
             )
             

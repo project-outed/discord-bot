@@ -38,7 +38,7 @@ class TicketPanel(commands.Cog):
                 "categories": self.config["categories"]
             }),
             files=[
-                discord.File("images/banners/banner.webp", filename="banner_ticket_panel.webp")
+                discord.File("src/bot/ui/messages/ticket/ticket_banner.webp", filename="banner_ticket_panel.webp")
             ]
         )
         await interaction.response.send_message(f"Panel sent successfully to {channel.mention}", ephemeral=True)

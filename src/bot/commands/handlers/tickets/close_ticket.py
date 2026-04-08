@@ -19,5 +19,12 @@ class Close(commands.Cog):
         if not access:
             return await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
 
+        ticket = await self.bot.db.tickets.get_ticket(interaction.channel.id)
+        if not ticket:
+            return await interaction.response.send_message("This channel is not a ticket.", ephemeral=True)
+            
+        if ticket.get('status') == 'closed':
+            return await interaction.response.send_message("This ticket is already closed.", ephemeral=True)
+
         from src.bot.ui.modals.ticket.close import TicketCloseReasonModal
         await interaction.response.send_modal(TicketCloseReasonModal(self.bot))

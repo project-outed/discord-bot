@@ -38,7 +38,7 @@ class Verification(commands.Cog):
         await channel.send(
             view=VerificationView(data=self.config),
             files=[
-                discord.File("images/banners/banner.webp", filename="banner_verification.webp")
+                discord.File("images/banners/verification_banner.webp", filename="banner_verification.webp")
             ]
         )
         await interaction.response.send_message(f"Panel sent successfully to {channel.mention}", ephemeral=True)

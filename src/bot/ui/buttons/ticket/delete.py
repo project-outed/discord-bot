@@ -16,7 +16,7 @@ class DeleteTicketButton(ui.View):
         button = ui.Button(
             label="Delete",
             style=discord.ButtonStyle.gray,
-            emoji="🗑️",
+            emoji=discord.PartialEmoji(name="delete_ticket", id=1491509389239124008),
             custom_id="delete_ticket_btn"
         )
         button.callback = self.callback

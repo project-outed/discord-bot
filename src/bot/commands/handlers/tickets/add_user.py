@@ -26,11 +26,31 @@ class Add(commands.Cog):
         if not ticket:
             return await interaction.followup.send("This channel is not a ticket.", ephemeral=True)
 
+        if user.id == ticket['owner_id']:
+            return await interaction.followup.send("The owner is already in the ticket.", ephemeral=True)
+
+        added_users = ticket.get('added_users') or []
+        if isinstance(added_users, str):
+            try:
+                import json
+                added_users = json.loads(added_users)
+            except:
+                added_users = []
+                
+        added_user_ids = [str(uid) for uid in added_users]
+
+        if str(user.id) in added_user_ids:
+            return await interaction.followup.send("The user is already in the ticket.", ephemeral=True)
+
+
+
+
         data = await self.bot.db.fetch("SELECT trust_score FROM users WHERE user_id = $1", (user.id), fetch_one=True)
         if not data:
             return await interaction.followup.send("User not found in database.", ephemeral=True)
 
         success = await self.bot.db.tickets.add_user(interaction.channel.id, user.id)
+
         if success:
             await interaction.channel.set_permissions(user, read_messages=True, send_messages=True)
             await interaction.followup.send(
@@ -40,7 +60,7 @@ class Add(commands.Cog):
                     "trust_score": str(data['trust_score']),
                     "avatar": user.avatar.url if user.avatar else user.default_avatar.url
                 }), 
-                files=[discord.File("images/banners/banner.webp", filename="banner_add_user.webp")]
+                files=[discord.File("images/banners/ticket_banner.webp", filename="banner_add_user.webp")]
             )
         else:
             await interaction.followup.send("User is already in the ticket or an error occurred.", ephemeral=True)

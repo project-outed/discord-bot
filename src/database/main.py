@@ -53,21 +53,17 @@ class Database:
 
     async def execute(self, query: str, *args) -> int:
         pool = await self.getPool()
-        async with pool.acquire() as conn:
-            # asyncpg returns a status string like "DELETE 1" or "UPDATE 5"
-            status = await conn.execute(query, *args)
-            try:
-                # The count is usually the last word in the status string
-                return int(status.split()[-1])
-            except (ValueError, IndexError):
-                return 0
+        status = await pool.execute(query, *args)
+        try:
+            return int(status.split()[-1])
+        except (ValueError, IndexError):
+            return 0
 
     async def fetch(self, query: str, *args, fetch_one=False):
         pool = await self.getPool()
-        async with pool.acquire() as conn:
-            if fetch_one:
-                row = await conn.fetchrow(query, *args)
-                return dict(row) if row else None
-            
-            rows = await conn.fetch(query, *args)
-            return [dict(row) for row in rows]
+        if fetch_one:
+            row = await pool.fetchrow(query, *args)
+            return dict(row) if row else None
+        
+        rows = await pool.fetch(query, *args)
+        return [dict(row) for row in rows]

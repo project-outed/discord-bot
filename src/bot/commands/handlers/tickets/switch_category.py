@@ -18,14 +18,20 @@ class Category(commands.Cog):
             with open("data/tickets/config.json", "r") as f:
                 config_data = json.load(f)
             categories = config_data.get('categories', [])
+            
+            ticket = await self.bot.db.tickets.get_ticket(interaction.channel.id)
+            current_type = ticket.get('ticket_type') if ticket else None
         except Exception as e:
-            Console.error(f"Failed to load ticket config.json: {e}", module="TICKET")
+            Console.error(f"Failed to load ticket config or DB: {e}", module="TICKET")
             categories = []
+            current_type = None
             
         return [
             app_commands.Choice(name=cat['title'], value=cat['value'])
-            for cat in categories if current.lower() in cat['title'].lower()
+            for cat in categories 
+            if current.lower() in cat['title'].lower() and cat['value'] != current_type
         ][:25]
+
 
     @app_commands.guilds(int(os.getenv("MAIN_GUILD")))
     @app_commands.command(name="category", description="Switch the ticket category")

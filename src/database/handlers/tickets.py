@@ -1,4 +1,5 @@
 from __future__ import annotations
+import json
 from typing import List, Optional, Dict, Any, TYPE_CHECKING
 from src.utils.console import Console
 
@@ -19,7 +20,7 @@ class TicketHandler:
             ticket_type VARCHAR(50) NOT NULL,
             claimed_by BIGINT DEFAULT NULL,
             status TEXT DEFAULT 'open' CHECK (status IN ('open', 'closed')),
-            added_users JSONB DEFAULT NULL,
+            added_users JSONB DEFAULT '[]'::jsonb,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """
@@ -44,40 +45,24 @@ class TicketHandler:
         return await self.db.fetch(query, channel_id, fetch_one=True)
 
     async def add_user(self, channel_id: int, user_id: int) -> bool:
-        ticket = await self.get_ticket(channel_id)
-        if not ticket: return False
-        
-        import json
-        users = ticket['added_users']
-        if isinstance(users, str):
-            users = json.loads(users)
-        elif users is None:
-            users = []
-            
-        if user_id not in users:
-            users.append(user_id)
-            query = f"UPDATE {self.table} SET added_users = $1 WHERE channel_id = $2"
-            await self.db.execute(query, json.dumps(users), channel_id)
-            return True
-        return False
+        query = f"""
+            UPDATE {self.table} 
+            SET added_users = COALESCE(added_users, '[]'::jsonb) || jsonb_build_array($1::text) 
+            WHERE channel_id = $2 
+            AND NOT (COALESCE(added_users, '[]'::jsonb) @> jsonb_build_array($1::text))
+            AND NOT (COALESCE(added_users, '[]'::jsonb) @> jsonb_build_array($1::bigint))
+        """
+        return await self.db.execute(query, str(user_id), channel_id) > 0
 
     async def remove_user(self, channel_id: int, user_id: int) -> bool:
-        ticket = await self.get_ticket(channel_id)
-        if not ticket: return False
-        
-        import json
-        users = ticket['added_users']
-        if isinstance(users, str):
-            users = json.loads(users)
-        elif users is None:
-            users = []
+        query = f"""
+            UPDATE {self.table} 
+            SET added_users = (COALESCE(added_users, '[]'::jsonb) - $1::text) - $1::text
+            WHERE channel_id = $2
+        """
+        return await self.db.execute(query, str(user_id), channel_id) > 0
 
-        if user_id in users:
-            users.remove(user_id)
-            query = f"UPDATE {self.table} SET added_users = $1 WHERE channel_id = $2"
-            await self.db.execute(query, json.dumps(users), channel_id)
-            return True
-        return False
+
 
     async def switch_owner(self, channel_id: int, new_owner_id: int) -> bool:
         query = f"UPDATE {self.table} SET owner_id = $1 WHERE channel_id = $2"

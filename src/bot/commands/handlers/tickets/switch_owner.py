@@ -22,6 +22,10 @@ class Switch(commands.Cog):
         ticket = await self.bot.db.tickets.get_ticket(interaction.channel.id)
         if not ticket:
             return await interaction.response.send_message("This channel is not a ticket.", ephemeral=True)
+            
+        if new_owner.id == ticket['owner_id']:
+            return await interaction.response.send_message(f"{new_owner.mention} is already the owner of this ticket.", ephemeral=True)
+
         
         success = await self.bot.db.tickets.switch_owner(interaction.channel.id, new_owner.id)
         if success:

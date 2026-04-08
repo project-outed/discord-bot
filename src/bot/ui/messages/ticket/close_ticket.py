@@ -25,8 +25,8 @@ class CloseTicketView(discord.ui.LayoutView):
 
                     "**TICKET INFORMATION**\n"
                     f"Category: `{self.data.get('category', 'N/A')}`\n"
-                    f"Closed By: `{self.data.get('closed_by', 'N/A')}`\n"
                     f"Closed Reason: `{self.data.get('reason', 'N/A')}`\n"
+                    f"Closed By: `{self.data.get('closed_by', 'N/A')}`\n"
                     f"Closed At: `{self.data.get('closed_at', 'N/A')}`\n\n"
 
                     "-# This ticket has been closed. You may press the button to delete the channel."

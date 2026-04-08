@@ -93,6 +93,6 @@ class TicketReasonModal(ui.Modal, title='Create Ticket'):
                 "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             }), 
             files=[
-                discord.File("images/banners/banner.webp", filename="banner_channel.webp")
+                discord.File("images/banners/ticket_banner.webp", filename="banner_channel.webp")
             ]
         )

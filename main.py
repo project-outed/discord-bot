@@ -1,6 +1,4 @@
 import asyncio
-import asyncio
-
 from src.bot.main import Bot
 from src.utils.console import Console
 

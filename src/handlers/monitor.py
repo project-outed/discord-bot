@@ -25,25 +25,49 @@ class Monitor:
 			Console.warning("No channel ID configured for expose reports.", module="MONITOR")
 			return
 
-		channel = self.bot.get_channel(int(channel_id)) or await self.bot.fetch_channel(int(channel_id))
-		if not channel:
-			Console.error(f"Channel with ID {channel_id} not found.", module="MONITOR")
+		try:
+			channel = self.bot.get_channel(int(channel_id)) or await self.bot.fetch_channel(int(channel_id))
+		except (discord.NotFound, discord.Forbidden):
+			Console.error(f"Channel with ID {channel_id} not found or inaccessible.", module="MONITOR")
 			return
-		
+		except Exception as e:
+			Console.error(f"Error fetching channel: {e}", module="MONITOR")
+			return
 
-		user = await self.bot.fetch_user(int(data.get("target_user_id", 0)))
+		target_user_id = data.get("target_user_id")
+		if not target_user_id or str(target_user_id).lower() == "unknown":
+			Console.error("Invalid target_user_id provided in report data.", module="MONITOR")
+			return
 
-		guild_id = int(os.getenv("MAIN_GUILD"))
-		guild = self.bot.get_guild(guild_id) or await self.bot.fetch_guild(guild_id)
-		
-		if guild:
-			role_id = int(self.config['expose'].get('role_id', 0))
-			role = guild.get_role(role_id)
-			
-			if role:
-				member = guild.get_member(user.id) or await guild.fetch_member(user.id)
-				if member:
-					await member.add_roles(role, reason="User has been exposed")
+		try:
+			user = await self.bot.fetch_user(int(target_user_id))
+		except discord.NotFound:
+			Console.error(f"User with ID {target_user_id} not found.", module="MONITOR")
+			return
+		except Exception as e:
+			Console.error(f"Error fetching user {target_user_id}: {e}", module="MONITOR")
+			return
+
+		guild_id = os.getenv("MAIN_GUILD")
+		if guild_id:
+			try:
+				guild = self.bot.get_guild(int(guild_id)) or await self.bot.fetch_guild(int(guild_id))
+				if guild:
+					role_id = self.config['expose'].get('role_id')
+					if role_id:
+						role = guild.get_role(int(role_id))
+						if role:
+							try:
+								member = guild.get_member(user.id) or await guild.fetch_member(user.id)
+								await member.add_roles(role, reason="User has been exposed")
+							except discord.NotFound:
+								return
+							except discord.Forbidden:
+								Console.warning(f"Bot lacks permissions to add role to {user.display_name} ({user.id}).", module="MONITOR")
+							except Exception as e:
+								Console.error(f"Error adding role to {user.id}: {e}", module="MONITOR")
+			except Exception as e:
+				Console.error(f"Error processing guild/role: {e}", module="MONITOR")
 
 		await channel.send(
             view=ExposeView(data={

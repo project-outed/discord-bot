@@ -16,7 +16,9 @@ class WebSocket:
 
     async def start(self):
         self._running = True
-        self._session = aiohttp.ClientSession()
+        
+        if not self._session or self._session.closed:
+            self._session = aiohttp.ClientSession()
 
         while self._running:
             try:                
@@ -25,8 +27,14 @@ class WebSocket:
                     await self.on_connect()
 
                     async for msg in ws:
+                        if not self._running:
+                            break
+                            
                         if msg.type == aiohttp.WSMsgType.TEXT:
-                            await self._handle_raw_message(msg.data)
+                            try:
+                                await self._handle_raw_message(msg.data)
+                            except Exception as e:
+                                Console.error(f"Error handling message: {e}", module="WEBSOCKET")
                         elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.CLOSING):
                             Console.warning("WebSocket closing or closed by server", module="WEBSOCKET")
                             break

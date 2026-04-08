@@ -41,38 +41,37 @@ class CreateReport(commands.Cog):
                 "x-api-key": os.getenv('API_KEY', '')
             }
 
-            async with aiohttp.ClientSession() as session:
-                async with session.post(f"{self.base_url}/api/reports", data=data, headers=headers) as resp:
-                    if resp.status in [200, 201]:
-                        try:
-                            result = await resp.json()
-                        except:
-                            result = {}
+            async with self.bot.session.post(f"{self.base_url}/api/reports", data=data, headers=headers) as resp:
+                if resp.status in [200, 201]:
+                    try:
+                        result = await resp.json()
+                    except:
+                        result = {}
 
-                        evidence_file = await evidence.to_file()
+                    evidence_file = await evidence.to_file()
 
-                        await interaction.followup.send(
-                            view=CreateReportView(data={
-                                "id": str(result.get('id', 'N/A')),
-                                "target_username": user.name,
-                                "target_user_id": str(user.id),
-                                "cheat": reason,
-                                "game": game,
-                                "avatar_url": user.display_avatar.url,
-                                "evidence": [evidence_file],
-                                "evidence_url": evidence.url
-                            }),
-                            file=evidence_file,
-                            ephemeral=True
-                        )
-                    else:
-                        error_data = await resp.text()
-                        await interaction.followup.send(
-                            f"**Failed to submit report.**\n"
-                            f"Backend returned status: `{resp.status}`\n"
-                            f"Response: ```{error_data[:100]}...```", 
-                            ephemeral=True
-                        )
+                    await interaction.followup.send(
+                        view=CreateReportView(data={
+                            "id": str(result.get('id', 'N/A')),
+                            "target_username": user.name,
+                            "target_user_id": str(user.id),
+                            "cheat": reason,
+                            "game": game,
+                            "avatar_url": user.display_avatar.url,
+                            "evidence": [evidence_file],
+                            "evidence_url": evidence.url
+                        }),
+                        file=evidence_file,
+                        ephemeral=True
+                    )
+                else:
+                    error_data = await resp.text()
+                    await interaction.followup.send(
+                        f"**Failed to submit report.**\n"
+                        f"Backend returned status: `{resp.status}`\n"
+                        f"Response: ```{error_data[:100]}...```", 
+                        ephemeral=True
+                    )
 
         except Exception as e:
             await interaction.followup.send(f"**An unexpected error occurred.**\nError: `{str(e)}`", ephemeral=True)

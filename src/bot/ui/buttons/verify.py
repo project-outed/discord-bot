@@ -11,7 +11,7 @@ class VerificationButton(ui.View):
         button = ui.Button(
             label="Verify",
             style=discord.ButtonStyle.link,
-            emoji=discord.PartialEmoji(name="ticket_support", id=1487822599810711712),
+            emoji=discord.PartialEmoji(name="verification", id=1491508874044506142),
             url=self.link
         )
         self.add_item(button)

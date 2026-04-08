@@ -3,6 +3,7 @@ import json
 import discord
 
 from src.bot.ui.buttons.ticket.panel import PanelButtons
+from src.bot.ui.buttons.ticket.delete import DeleteTicketButton
 
 bot: discord.Client = None
 
@@ -12,3 +13,4 @@ class UIManager:
 
     async def load(self):
         self.bot.add_view(PanelButtons(self.bot))
+        self.bot.add_view(DeleteTicketButton(self.bot))
