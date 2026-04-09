@@ -18,7 +18,7 @@ class TranscriptEvent(commands.Cog):
         import aiohttp
         from datetime import datetime
         
-        base_dir = os.path.join("data", "transcripts", str(message.channel.id))
+        base_dir = os.path.join("data", "tickets", "transcripts", str(message.channel.id))
         attachments_dir = os.path.join(base_dir, "attachments")
         os.makedirs(attachments_dir, exist_ok=True)
 
