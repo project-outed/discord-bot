@@ -15,7 +15,7 @@ class CheckReport(ui.View):
         self.addButtons()
 
     def __load_config(self):
-        configPath = os.path.join("data", "expose", "config.json")
+        configPath = os.path.join("data", "exposes", "config.json")
         with open(configPath, "r") as f:
             return json.load(f)
     

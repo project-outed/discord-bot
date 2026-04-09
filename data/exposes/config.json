@@ -11,5 +11,22 @@
             "value": "decline",
             "button_emote": "1487822599810711712"
         }
+    ],
+    "cheats": [
+        "Binary",
+        "Eternity",
+        "Eulen",
+        "HX Cheats",
+        "Keyser",
+        "Macho",
+        "Red Engine",
+        "Severance",
+        "Skidmenu",
+        "Skript.gg",
+        "Spotless",
+        "TZ Project"
+    ],
+    "games": [
+        "FiveM"
     ]
 }

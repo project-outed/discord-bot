@@ -1,9 +1,11 @@
 import os
+import json
 import aiohttp
 import discord
 from discord.ext import commands
 from discord import app_commands
 from src.utils.console import Console
+from typing import List
 
 from src.bot.ui.messages.expose.create_report import CreateReportView
 
@@ -11,12 +13,46 @@ class CreateReport(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.base_url = os.getenv("API_URI")
+        self.config = self.__load_config()
 
+    def __load_config(self):
+        configPath = os.path.join("data", "exposes", "config.json")
+        with open(configPath, "r") as f:
+            return json.load(f)
+
+    async def game_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        try:
+            games = self.config.get('games', [])
+        except Exception as e:
+            Console.error(f"Failed to load expose config: {e}", module="EXPOSE")
+            games = []
+            
+        return [
+            app_commands.Choice(name=game, value=game.lower())
+            for game in games 
+            if current.lower() in game.lower()
+        ][:25]
+
+    async def reason_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        try:
+            reasons = self.config.get('cheats', [])
+        except Exception as e:
+            Console.error(f"Failed to load expose config: {e}", module="EXPOSE")
+            reasons = []
+            
+        return [
+            app_commands.Choice(name=reason, value=reason.lower())
+            for reason in reasons 
+            if current.lower() in reason.lower()
+        ][:25]
+
+    @app_commands.guilds(int(os.getenv("MAIN_GUILD")))
     @app_commands.command(name="report", description="Create a report for a user")
     @app_commands.describe(
         user="The user you are reporting", reason="The reason for the report", 
         game="The game where the incident occurred", evidence="Evidence for the report (image/video)"
     )
+    @app_commands.autocomplete(game=game_autocomplete, reason=reason_autocomplete)
     async def report(self, interaction: discord.Interaction, user: discord.User, reason: str, game: str, evidence: discord.Attachment):
         await interaction.response.defer(ephemeral=True)
 

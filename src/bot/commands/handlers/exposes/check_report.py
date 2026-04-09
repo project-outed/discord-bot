@@ -30,7 +30,7 @@ class CheckReport(commands.Cog):
     async def check_report(self, interaction: discord.Interaction, report: str):        
         await interaction.response.defer(ephemeral=True)
 
-        permission_ids = Permission().get_permission(config=os.path.join("data", "expose", "config.json"))
+        permission_ids = Permission().get_permission(config=os.path.join("data", "exposes", "config.json"))
         access = Permission(user=interaction.user, ids=permission_ids['permission']).role()
 
         if not access:
