@@ -7,7 +7,7 @@ from src.handlers.monitor import Monitor
 
 class WebSocket:
     def __init__(self):
-        self.uri = f"ws://{os.getenv('WEBSOCKET_HOST')}:{os.getenv('WEBSOCKET_PORT')}/{os.getenv('WEBSOCKET_PATH')}"
+        self.uri = f"ws://{os.getenv('WEBSOCKET_HOST')}/{os.getenv('WEBSOCKET_PATH')}"
         self.ws = None
         self._session = None
         self._reconnect_interval = 5

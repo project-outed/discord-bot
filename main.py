@@ -17,9 +17,9 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-database: Database = Database()
-websocket: WebSocket = WebSocket()
 redis: Redis = Redis()
+database: Database = Database(redis=redis)
+websocket: WebSocket = WebSocket()
 
 command_manager: CommandManager = CommandManager()
 events_manager: EventManager = EventManager()

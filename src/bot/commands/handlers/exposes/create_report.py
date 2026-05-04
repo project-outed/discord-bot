@@ -28,7 +28,7 @@ class CreateReport(commands.Cog):
             games = []
             
         return [
-            app_commands.Choice(name=game, value=game.lower())
+            app_commands.Choice(name=game, value=game)
             for game in games 
             if current.lower() in game.lower()
         ][:25]
@@ -41,7 +41,7 @@ class CreateReport(commands.Cog):
             reasons = []
             
         return [
-            app_commands.Choice(name=reason, value=reason.lower())
+            app_commands.Choice(name=reason, value=reason)
             for reason in reasons 
             if current.lower() in reason.lower()
         ][:25]

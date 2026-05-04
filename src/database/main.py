@@ -6,9 +6,11 @@ import json
 from src.utils.console import Console
 from src.database.handlers.tickets import TicketHandler
 from src.database.handlers.transcript import TranscriptHandler
+from src.database.handlers.reports import ReportsHandler
+from src.database.handlers.guilds import GuildsHandler
 
 class Database:
-    def __init__(self):
+    def __init__(self, redis=None):
         self.pool = None
         self.host = os.getenv("DATABASE_HOST")
         self.port = int(os.getenv("DATABASE_PORT", 5432))
@@ -16,9 +18,12 @@ class Database:
         self.user = os.getenv("DATABASE_USER", "postgres")
         self.password = os.getenv("DATABASE_PASS")
 
+        self.redis = redis
 
         self.tickets = TicketHandler(self)
         self.transcripts = TranscriptHandler(self)
+        self.reports = ReportsHandler(self)
+        self.guilds = GuildsHandler(self)
     
     async def connect(self):
         try:
