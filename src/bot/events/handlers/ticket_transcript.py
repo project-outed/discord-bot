@@ -16,6 +16,7 @@ class TranscriptEvent(commands.Cog):
 
         import os
         import aiohttp
+        import asyncio
         from datetime import datetime
         
         base_dir = os.path.join("data", "tickets", "transcripts", str(message.channel.id))
@@ -24,8 +25,16 @@ class TranscriptEvent(commands.Cog):
 
         journal_path = os.path.join(base_dir, "journal.txt")
         timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-        with open(journal_path, "a", encoding="utf-8") as f:
-            f.write(f"[{timestamp}] {message.author}: {message.content or ''}\n")
+
+        def write_journal(path, content):
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(content)
+                
+        def write_attachment(path, content):
+            with open(path, "wb") as f:
+                f.write(content)
+
+        await asyncio.to_thread(write_journal, journal_path, f"[{timestamp}] {message.author}: {message.content or ''}\n")
 
         attachments = []
         for attachment in message.attachments:
@@ -37,8 +46,8 @@ class TranscriptEvent(commands.Cog):
                 async with aiohttp.ClientSession() as session:
                     async with session.get(attachment.url) as resp:
                         if resp.status == 200:
-                            with open(local_path, "wb") as f:
-                                f.write(await resp.read())
+                            content = await resp.read()
+                            await asyncio.to_thread(write_attachment, local_path, content)
                             
                             attachments.append({
                                 "filename": attachment.filename,
@@ -46,8 +55,7 @@ class TranscriptEvent(commands.Cog):
                                 "content_type": str(attachment.content_type)
                             })
                             
-                            with open(journal_path, "a", encoding="utf-8") as f:
-                                f.write(f"[{timestamp}] {message.author} attached file: {attachment.filename}\n")
+                            await asyncio.to_thread(write_journal, journal_path, f"[{timestamp}] {message.author} attached file: {attachment.filename}\n")
             except Exception as e:
                 from src.utils.console import Console
                 Console.error(f"Failed to download attachment {attachment.filename}: {e}", "TRANSCRIPT")

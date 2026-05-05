@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from discord.ext import commands
 from src.utils.console import Console
@@ -8,19 +9,17 @@ class MemberMonitor(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_member_join(self, member: discord.Member):
-        Console.info(f"Member {member.display_name} ({member.id}) joined {member.guild.name} ({member.guild.id})", module="MEMBER_MONITOR")
-        
+    async def on_member_join(self, member: discord.Member):        
         reports = await self.bot.db.reports.get_accepted_reports(member.id)
 
         if not reports:
             Console.info(f"No accepted reports found for member {member.display_name} ({member.id})", module="MEMBER_MONITOR")
             return
 
-        Console.info(f"Found {len(reports)} accepted reports for member {member.display_name} ({member.id})", module="MEMBER_MONITOR")
-
-        guild_settings = await self.bot.db.guilds.get_guild_settings(member.guild.id)
-        trust_score = await self.bot.db.fetch("SELECT trust_score FROM users WHERE user_id = $1", member.id)
+        guild_settings, trust_score_row = await asyncio.gather(
+            self.bot.db.guilds.get_guild_settings(member.guild.id),
+            self.bot.db.fetch("SELECT trust_score FROM users WHERE user_id = $1", member.id, fetch_one=True)
+        )
 
         if not guild_settings or not guild_settings.get('alert_channel'):
             Console.warning(f"No alert channel configured for guild {member.guild.name} ({member.guild.id})", module="MEMBER_MONITOR")
@@ -34,7 +33,7 @@ class MemberMonitor(commands.Cog):
                     "username": member.display_name,
                     "platform_id": str(member.id),
                     "avatar": member.display_avatar.url,
-                    "trust_score": trust_score[0]['trust_score'] if trust_score else None,
+                    "trust_score": trust_score_row['trust_score'] if trust_score_row else None,
                     "reports": [
                         {
                             "id": r.get("id"),
