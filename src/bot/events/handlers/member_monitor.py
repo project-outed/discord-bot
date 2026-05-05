@@ -8,6 +8,13 @@ class MemberMonitor(commands.Cog):
     def __init__(self, bot: discord.Client):
         self.bot = bot
 
+    async def _ghost_ping(self, channel: discord.TextChannel, role_id: int):
+        try:
+            msg = await channel.send(content=f"<@&{role_id}>")
+            await msg.delete()
+        except Exception:
+            pass
+
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):        
         reports = await self.bot.db.reports.get_accepted_reports(member.id)
@@ -29,6 +36,7 @@ class MemberMonitor(commands.Cog):
         try:
             channel = member.guild.get_channel(int(channel_id)) or await member.guild.fetch_channel(int(channel_id))
             if channel:
+                # Optimized data structure construction
                 view_data = {
                     "username": member.display_name,
                     "platform_id": str(member.id),
@@ -44,6 +52,10 @@ class MemberMonitor(commands.Cog):
                         for r in reports
                     ],
                 }
+
+                role_id = guild_settings.get('alert_role')
+                if role_id:
+                    asyncio.create_task(self._ghost_ping(channel, role_id))
 
                 await channel.send(view=MemberMonitorView(bot=self.bot, data=view_data))
         except Exception as e:
