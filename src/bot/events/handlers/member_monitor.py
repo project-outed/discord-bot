@@ -1,8 +1,7 @@
-import os
-import json
 import discord
 from discord.ext import commands
 from src.utils.console import Console
+from src.bot.ui.messages.member_monitor import MemberMonitorView
 
 class MemberMonitor(commands.Cog):
     def __init__(self, bot: discord.Client):
@@ -19,7 +18,10 @@ class MemberMonitor(commands.Cog):
             return
 
         Console.info(f"Found {len(reports)} accepted reports for member {member.display_name} ({member.id})", module="MEMBER_MONITOR")
+
         guild_settings = await self.bot.db.guilds.get_guild_settings(member.guild.id)
+        trust_score = await self.bot.db.fetch("SELECT trust_score FROM users WHERE user_id = $1", member.id)
+
         if not guild_settings or not guild_settings.get('alert_channel'):
             Console.warning(f"No alert channel configured for guild {member.guild.name} ({member.guild.id})", module="MEMBER_MONITOR")
             return
@@ -28,23 +30,22 @@ class MemberMonitor(commands.Cog):
         try:
             channel = member.guild.get_channel(int(channel_id)) or await member.guild.fetch_channel(int(channel_id))
             if channel:
-                embed = discord.Embed(
-                    title="🚨 Flagged Member Joined",
-                    description=f"A member with **{len(reports)}** accepted report(s) has joined the server.",
-                    color=discord.Color.red(),
-                    timestamp=discord.utils.utcnow()
-                )
-                embed.set_author(name=member.display_name, icon_url=member.display_avatar.url)
-                embed.add_field(name="User", value=f"{member.mention} ({member.id})", inline=True)
-                embed.add_field(name="Reports", value=f"`{len(reports)}`", inline=True)
-                
-                # Add information about the latest report if available
-                if reports:
-                    latest = reports[0] # Assuming first in list for now
-                    embed.add_field(name="Latest Reason", value=latest.get('reason', 'N/A'), inline=False)
-                    embed.add_field(name="Game", value=latest.get('game', 'N/A'), inline=True)
+                view_data = {
+                    "username": member.display_name,
+                    "platform_id": str(member.id),
+                    "avatar": member.display_avatar.url,
+                    "trust_score": trust_score[0]['trust_score'] if trust_score else None,
+                    "reports": [
+                        {
+                            "id": r.get("id"),
+                            "reason": r.get("reason", "N/A"),
+                            "game": r.get("game", "N/A"),
+                            "created_at": r.get("created_at", ""),
+                        }
+                        for r in reports
+                    ],
+                }
 
-                await channel.send(embed=embed)
-                Console.success(f"Sent alert for {member.display_name} to channel {channel.name}", module="MEMBER_MONITOR")
+                await channel.send(view=MemberMonitorView(bot=self.bot, data=view_data))
         except Exception as e:
             Console.error(f"Failed to send alert to channel {channel_id}: {e}", module="MEMBER_MONITOR")
