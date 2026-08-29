@@ -7,15 +7,22 @@ class Setup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="setup_alerts", description="Setup the alert channel for the member monitor")
-    @app_commands.describe(channel="The channel where alerts should be sent")
+    @app_commands.command(name="setup_alerts", description="Setup the alerts for the member monitor")
+    @app_commands.describe(
+        channel="The channel where alerts should be sent",
+        role="The role that should be mentioned in alerts"
+    )
     @app_commands.checks.has_permissions(administrator=True)
-    async def setup_alerts(self, interaction: discord.Interaction, channel: discord.TextChannel):
+    async def setup_alerts(self, interaction: discord.Interaction, channel: discord.TextChannel, role: discord.Role = None):
         await interaction.response.defer(ephemeral=True)
         
+        settings = {"alert_channel": channel.id}
+        if role:
+            settings["alert_role"] = role.id
+
         success = await self.bot.db.guilds.update_guild_settings(
             interaction.guild.id, 
-            alert_channel=str(channel.id)
+            **settings
         )
         
         if success:

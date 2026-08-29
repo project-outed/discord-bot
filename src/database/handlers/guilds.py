@@ -46,6 +46,15 @@ class GuildsHandler:
         if not settings:
             return False
 
+        # Ensure ID fields are integers if passed as strings
+        id_fields = ['alert_channel', 'alert_role']
+        for field in id_fields:
+            if field in settings and isinstance(settings[field], str):
+                try:
+                    settings[field] = int(settings[field])
+                except ValueError:
+                    pass
+
         keys = list(settings.keys())
         values = list(settings.values())
         

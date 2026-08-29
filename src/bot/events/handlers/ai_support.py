@@ -2,6 +2,7 @@ import os
 import json
 import aiohttp
 import discord
+import asyncio
 from discord.ext import commands
 from src.utils.console import Console
 
@@ -30,10 +31,13 @@ class AISupport(commands.Cog):
         configPath = os.path.join("data", "ai_support", "config.json")
         if not os.path.exists(configPath): return
 
-        with open(configPath, 'r', encoding='utf-8') as file:
-            data = json.load(file)
-            if message.channel.id not in data.get("channels", []):
-                return
+        def load_ai_config():
+            with open(configPath, 'r', encoding='utf-8') as file:
+                return json.load(file)
+                
+        data = await asyncio.to_thread(load_ai_config)
+        if message.channel.id not in data.get("channels", []):
+            return
 
         text = (message.content or "").strip()
         api_key = os.getenv("OPENAI_TOKEN", "").strip()

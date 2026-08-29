@@ -57,12 +57,10 @@ class TicketHandler:
     async def remove_user(self, channel_id: int, user_id: int) -> bool:
         query = f"""
             UPDATE {self.table} 
-            SET added_users = (COALESCE(added_users, '[]'::jsonb) - $1::text) - $1::text
+            SET added_users = COALESCE(added_users, '[]'::jsonb) - $1::text
             WHERE channel_id = $2
         """
         return await self.db.execute(query, str(user_id), channel_id) > 0
-
-
 
     async def switch_owner(self, channel_id: int, new_owner_id: int) -> bool:
         query = f"UPDATE {self.table} SET owner_id = $1 WHERE channel_id = $2"
